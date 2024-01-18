@@ -4,17 +4,15 @@ from core.handlers.basic import get_start
 
 import asyncio
 import logging
-
-
-from config import tg_api_token, my_user_id
+from core.settings import settings
 
 
 async def start_bot(bot: Bot):
-    await bot.send_message(my_user_id, text="Hello. Bot is starts")
+    await bot.send_message(settings.bots.admin_id, text="Hello. Bot is starts")
 
 
 async def stop_bot(bot: Bot):
-    await bot.send_message(my_user_id, text="Hello. Bot is closed")
+    await bot.send_message(settings.bots.admin_id, text="Hello. Bot is closed")
 
 
 async def start():
@@ -22,7 +20,7 @@ async def start():
         level=logging.INFO,
         format="%(asctime)s - [%(levelname)s] - %(name)s - (%(filename)s).%(funcName)s(%(lineno)d) - %(message)s",
     )
-    bot = Bot(token=tg_api_token, parse_mode="HTML")
+    bot = Bot(token=settings.bots.bot_token, parse_mode="HTML")
 
     dp = Dispatcher()
     dp.startup.register(start_bot)
