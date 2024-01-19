@@ -1,15 +1,28 @@
 from aiogram import Bot
 from aiogram.types import Message
+from parser.manage import get_csv
+
+
+user_name = None  # its dummy username save
 
 
 async def get_start(message: Message, bot: Bot):
     await bot.send_message(
         message.from_user.id,
-        f"<b>Hello {message.from_user.first_name}, welcome to my bot1</b>",
+        f"<b>Hello {message.from_user.first_name}, welcome to my bot\nPlease enter your name:</b>",
     )
-    await message.answer(
-        f"<s>Hello {message.from_user.first_name}, welcome to my bot2</s>"
-    )
-    await message.reply(
-        f"<tg-spoiler>Hello {message.from_user.first_name}, welcome to my bot3</tg-spoiler>"
-    )
+
+
+async def get_text(message: Message):
+    global user_name
+    await message.answer("You send me a text message")
+    if not user_name:
+        user_name = message.text
+        await message.answer(f"Your name {user_name} is saved")
+    else:
+        await message.answer(f"Dear, {user_name} parsing process is starts")
+        try:
+            result_csv: str = await get_csv(message.text)
+            await message.answer_document(document=result_csv)
+        except Exception as err:
+            print(f"Get error: {err}")

@@ -23,4 +23,3 @@ def get_settings(path: str) -> Settings:
 
 
 settings = get_settings("input")
-print(settings)
