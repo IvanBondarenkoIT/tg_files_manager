@@ -104,3 +104,5 @@ for book in books_data:
 # sing_in_button.click()
 
 # driver.quit()
+# /html/body/div/div/div/div/section/div[2]/ol/li[1]/article/h3/a
+# [{'Book Name': '/html/body/div/div/div[2]/div[2]/article/div[1]/div[2]/h1'}, {'Description': '/html/body/div/div/div[2]/div[2]/article/p'}, {'UPC': '/html/body/div/div/div[2]/div[2]/article/table/tbody/tr[1]/td'}, {'Product Type': '/html/body/div/div/div[2]/div[2]/article/table/tbody/tr[2]/td'}, {'Tax': '/html/body/div/div/div[2]/div[2]/article/table/tbody/tr[5]/td'}, {'Availability': '/html/body/div/div/div[2]/div[2]/article/table/tbody/tr[6]/td'}]

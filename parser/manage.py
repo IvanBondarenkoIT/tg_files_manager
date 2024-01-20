@@ -4,7 +4,7 @@ import csv
 def get_csv(link: str):
     print(f"START PARSING {link}")
 
-    with open("result.csv", mode="w") as f:
+    with open("characteristics_xpath.csv", mode="w") as f:
         # reader = csv.reader(f)
         return f
 
