@@ -22,7 +22,9 @@ async def get_text(message: Message):
     else:
         await message.answer(f"Dear, {user_name} parsing process is starts")
         try:
-            result_csv: str = await get_csv(message.text)
-            await message.answer_document(document=result_csv)
+            result_csv: str = get_csv(message.text)
+            print(result_csv)
+            await message.answer(result_csv)
+            # await message.answer_document(document=result_csv)
         except Exception as err:
             print(f"Get error: {err}")

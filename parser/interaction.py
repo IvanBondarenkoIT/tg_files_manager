@@ -1,7 +1,9 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import csv
-from parse_pattern import book_xpath
+from parser.parse_pattern import book_xpath
+
+NEXT_BUTTON_XPATH = "/html/body/div/div/div/div/section/div[2]/div/ul/li[2]/a"
 
 
 class BookScraper:
@@ -24,8 +26,6 @@ class BookScraper:
             for book_link in books_links:
                 book_record = {}
                 book_record["Book link"] = book_link.get_attribute("href")
-                print(f"Book link:{book_link.get_attribute('href')}")
-
                 book_link.click()
 
                 for book_characteristic in book_xpath.book_characteristics:
@@ -42,19 +42,13 @@ class BookScraper:
                         book_characteristic_name
                     ] = book_characteristic_value.text
 
-                    print(
-                        f"{book_characteristic_name}:{book_characteristic_value.text}"
-                    )
-
                 self.books_data.append(book_record)
 
                 self.driver.back()
 
             next_page_button = None
             try:
-                next_page_button = self.driver.find_element(
-                    By.XPATH, "/html/body/div/div/div/div/section/div[2]/div/ul/li[2]/a"
-                )
+                next_page_button = self.driver.find_element(By.XPATH, NEXT_BUTTON_XPATH)
             except:
                 pass
                 # raise Exception(err)
@@ -64,30 +58,20 @@ class BookScraper:
             else:
                 break
 
+    def close_driver(self):
+        self.driver.close()
+
     def save_to_csv(self, csv_filename):
         with open(csv_filename, "w") as file:
             writer = csv.writer(file)
 
             for book in self.books_data:
-                print(book)
-
                 writer.writerow(
                     [
                         f"{book_characteristic}:{book_value}"
                         for book_characteristic, book_value in book.items()
                     ]
                 )
-                # for book_characteristic in book:
-                #     value = book[book_characteristic]
-                #     print(book_characteristic, value)
-                #     writer.writerow([book_characteristic, value])
-                # writer.writerow(
-                #     [
-                #         f"Book link: {book['book_link']}",
-                #         f"Book publishing: {book.get('book_publishing', '')}",
-                #         # Add other fields as needed
-                #     ]
-                # )
 
 
 if __name__ == "__main__":
@@ -96,4 +80,5 @@ if __name__ == "__main__":
         "https://books.toscrape.com/catalogue/category/books/politics_48/index.html"
     )
     scraper.scrape_books()
+    scraper.close_driver()
     scraper.save_to_csv("books.csv")

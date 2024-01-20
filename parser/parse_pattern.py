@@ -28,9 +28,9 @@ def get_book_settings(path: str) -> BookParsePattern:
 
 book_xpath = get_book_settings(characteristics_file)
 
-#
-# if __name__ == "__main__":
-#     book = BookParsePattern()
-#     book.read_csv_with_characteristics()
-#     print(book.book_link)
-#     print(book.book_characteristics)
+
+if __name__ == "__main__":
+    book = BookParsePattern()
+    book.read_csv_with_characteristics()
+    print(book.book_link)
+    print(book.book_characteristics)
