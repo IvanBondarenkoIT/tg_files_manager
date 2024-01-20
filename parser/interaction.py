@@ -1,106 +1,84 @@
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import csv
+from parser.parse_pattern import book_xpath
 
-chrome_options = webdriver.ChromeOptions()
-chrome_options.add_experimental_option("detach", True)
-
-driver = webdriver.Chrome(options=chrome_options)
-# driver.get("https://en.wikipedia.org/wiki/Main_Page")
-
-# article_count = driver.find_element(
-#     By.XPATH,
-#     "/html/body/div[2]/div/div[3]/main/div[3]/div[3]/div[1]/div[1]/div/div[3]/a[1]",
-# )
-#
-# article_count.click()
-# print(article_count.text)
-
-# all_portals = driver.find_element(By.LINK_TEXT, value="Content portals")
-# all_portals.click()
-
-# # Find the "Search <input> by Name
-# search = driver.find_element(By.NAME, value="search")
-# # Sending keyboard input to Selenium
-# search.send_keys("Python", Keys.ENTER)
-
-# driver.get("https://books.toscrape.com/catalogue/category/books/travel_2/index.html")
-driver.get("https://books.toscrape.com/catalogue/category/books/mystery_3/index.html")
-# driver.find_element(By.XPATH, "")
-
-# •	По окончанию парсинга выдаёт csv c товарами в котором написаны(
-# Название,
-# цена,
-# ссылка,
-# есть ли в наличии
-# и их характеристики)
+NEXT_BUTTON_XPATH = "/html/body/div/div/div/div/section/div[2]/div/ul/li[2]/a"
 
 
-# /html/body/div/div/div/div/section/div[2]/ol/li/article/div[2]/p[1]
-# /html/body/div/div/div/div/section/div[2]/ol/li/article/div[2]/p[1]
-books_data = []
+class BookScraper:
+    def __init__(self, start_url):
+        self.start_url = start_url
+        self.books_data = []
 
-while True:
-    books_links = driver.find_elements(
-        By.XPATH, "/html/body/div/div/div/div/section/div[2]/ol/li/article/h3/a"
-    )
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_experimental_option("detach", True)
+        self.driver = webdriver.Chrome(options=chrome_options)
 
-    for book_link in books_links:
-        print(f"Book name:{book_link.text}")
-        book_link.click()
-        book_description = driver.find_element(
-            By.XPATH, "/html/body/div/div/div[2]/div[2]/article/p"
-        )
-        print(book_description.text)
+    def scrape_books(self):
+        self.driver.get(self.start_url)
 
-        books_data.append(
-            {
-                # "book_title": books_name_links[ind].text,
-                # "book_author": book_author,
-                "book_publishing": book_description.text,
-                # "book_new_price": book_new_price,
-                # "book_old_price": book_old_price,
-                # "book_sale": book_sale,
-                # "book_status": book_status
-            }
-        )
-
-        driver.back()
-
-    next_page_button = driver.find_element(
-        By.XPATH, "/html/body/div/div/div/div/section/div[2]/div/ul/li[2]/a"
-    )
-    if next_page_button:
-        next_page_button.click()
-    else:
-        break
-
-for book in books_data:
-    with open("books.csv", "a") as file:
-        writer = csv.writer(file)
-
-        writer.writerow(
-            (
-                f"Book name:{book['book_publishing']}",
-                # f"Book price:{books_prices[ind].text}",
-                # f"Book description:{book_description.text}",
+        while True:
+            books_links = self.driver.find_elements(
+                By.XPATH, book_xpath.book_name_xpath
             )
-        )
+
+            for book_link in books_links:
+                book_record = {}
+                book_record["Book link"] = book_link.get_attribute("href")
+                book_link.click()
+
+                for book_characteristic in book_xpath.book_characteristics:
+                    (
+                        book_characteristic_name,
+                        book_characteristic_xpath,
+                    ) = book_characteristic
+
+                    book_characteristic_value = self.driver.find_element(
+                        By.XPATH, book_characteristic_xpath
+                    )
+
+                    book_record[
+                        book_characteristic_name
+                    ] = book_characteristic_value.text
+
+                self.books_data.append(book_record)
+
+                self.driver.back()
+
+            next_page_button = None
+            try:
+                next_page_button = self.driver.find_element(By.XPATH, NEXT_BUTTON_XPATH)
+            except:
+                pass
+                # raise Exception(err)
+
+            if next_page_button:
+                next_page_button.click()
+            else:
+                break
+
+    def close_driver(self):
+        self.driver.close()
+
+    def save_to_csv(self, csv_filename):
+        with open(csv_filename, "w") as file:
+            writer = csv.writer(file)
+
+            for book in self.books_data:
+                writer.writerow(
+                    [
+                        f"{book_characteristic}:{book_value}"
+                        for book_characteristic, book_value in book.items()
+                    ]
+                )
 
 
-# first_name_record.send_keys("Ivan")
-
-# /html/body/div/div/div/div/section/div[2]/ol/li/article/h3/a
-# /html/body/div/div/div/div/section/div[2]/ol/li/article/h3/a
-
-# last_name_record = driver.find_element(By.XPATH, "/html/body/form/input[2]")
-# last_name_record.send_keys("Bondarenko")
-#
-# email_record = driver.find_element(By.XPATH, "/html/body/form/input[3]")
-# email_record.send_keys("EMAIL@gsdfg.dfg")
-#
-# sing_in_button = driver.find_element(By.XPATH, "/html/body/form/button")
-# sing_in_button.click()
-
-# driver.quit()
+if __name__ == "__main__":
+    scraper = BookScraper(
+        # "https://books.toscrape.com/catalogue/category/books/mystery_3/index.html"
+        "https://books.toscrape.com/catalogue/category/books/politics_48/index.html"
+    )
+    scraper.scrape_books()
+    scraper.close_driver()
+    scraper.save_to_csv("books.csv")

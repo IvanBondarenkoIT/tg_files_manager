@@ -1,6 +1,7 @@
 from aiogram import Bot
 from aiogram.types import Message
 from parser.manage import get_csv
+from aiogram.types import FSInputFile
 
 
 user_name = None  # its dummy username save
@@ -13,7 +14,7 @@ async def get_start(message: Message, bot: Bot):
     )
 
 
-async def get_text(message: Message):
+async def get_text(message: Message, bot: Bot):
     global user_name
     await message.answer("You send me a text message")
     if not user_name:
@@ -22,7 +23,12 @@ async def get_text(message: Message):
     else:
         await message.answer(f"Dear, {user_name} parsing process is starts")
         try:
-            result_csv: str = await get_csv(message.text)
-            await message.answer_document(document=result_csv)
+            result_csv: str = get_csv(message.text)
+            await message.answer('Here a result of parsing in "books.csv" file')
+            book_file = FSInputFile(result_csv)
+            await bot.send_document(message.chat.id, document=book_file)
+
+            # cat = FSInputFile("cat.png")
+            # await message.answer_document(document=result_csv)
         except Exception as err:
             print(f"Get error: {err}")
